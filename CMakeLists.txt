@@ -39,9 +39,10 @@ if(NOT EXISTS "${PROJECT_SOURCE_DIR}/lib/libuvc-theta")	# nothing has been creat
 endif()
 
 # Add Libraries
-
 set(BUILD_EXAMPLE OFF)
 add_subdirectory(lib/libuvc-theta)
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 # Link Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE uvc)
+target_link_libraries(${PROJECT_NAME} PRIVATE uvc ${OpenCV_LIBS})
