@@ -44,4 +44,4 @@ set(BUILD_EXAMPLE OFF)
 add_subdirectory(lib/libuvc-theta)
 
 # Link Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE LibUVC)
+target_link_libraries(${PROJECT_NAME} PRIVATE uvc)
