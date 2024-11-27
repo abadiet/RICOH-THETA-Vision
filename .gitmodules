@@ -1,0 +1,3 @@
+[submodule "lib/libuvc"]
+	path = lib/libuvc
+	url = git@github.com:abadiet/libuvc.git
