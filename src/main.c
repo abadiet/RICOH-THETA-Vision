@@ -24,14 +24,15 @@ int main (int argc, char **argv) {
         return res;
     }
 
-	printf("No : %-18s : %-10s\n", "Product", "Serial");
+    printf ("Devices found:\n");
+	printf("# No : %-18s : %-10s\n", "Product", "Serial");
     while (devlist[idx] != NULL) {
         uvc_device_descriptor_t *desc;
 
         if (uvc_get_device_descriptor(devlist[idx], &desc) != UVC_SUCCESS)
             continue;
 
-        printf("%2d : %-18s : %-10s\n", idx, desc->product,
+        printf("# %2d : %-18s : %-10s\n", idx, desc->product,
             desc->serialNumber);
 
         uvc_free_device_descriptor(desc);
