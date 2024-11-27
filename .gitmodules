@@ -1,3 +1,7 @@
 [submodule "lib/libuvc-theta"]
 	path = lib/libuvc-theta
 	url = https://github.com/ricohapi/libuvc-theta
+[submodule "lib/libuvc-theta-sample"]
+	path = lib/libuvc-theta-sample
+	url = git@github.com:buburider/libuvc-theta-sample.git
+	branch = theta_x
