@@ -39,9 +39,12 @@ endif()
 # Add Libraries
 set(BUILD_EXAMPLE OFF)
 add_subdirectory(lib/libuvc-theta)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavutil libswscale libswresample)
+find_package(OpenCV REQUIRED)
 
 # Includes
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${PROJECT_NAME} PUBLIC include ${FFMPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 # Link Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE uvc)
+target_link_libraries(${PROJECT_NAME} PRIVATE uvc ${FFMPEG_LIBRARIES} ${OpenCV_LIBS})
