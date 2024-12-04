@@ -109,7 +109,7 @@ thetauvc_find_devices(uvc_context_t *ctx, uvc_device_t ***devs)
 
 			devcnt++;
 
-			tmp_ptr = realloc(ret, (devcnt+1) * sizeof(uvc_device_t *));
+			tmp_ptr = realloc(ret, (size_t) (devcnt+1) * sizeof(uvc_device_t *));
 			if (tmp_ptr == NULL) {
 				uvc_free_device_list(devlist, 1);
 				uvc_free_device_descriptor(desc);
@@ -258,7 +258,7 @@ thetauvc_get_stream_ctrl_format_size(uvc_device_handle_t *devh,
 	m = &stream_mode[mode];
 
 	res = uvc_get_stream_ctrl_format_size(devh, ctrl,
-			UVC_FRAME_FORMAT_H264, m->width, m->height, m->fps);
+			UVC_FRAME_FORMAT_H264, (int) m->width, (int) m->height, (int) m->fps);
 
 	return res;
 }

@@ -13,7 +13,7 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 # Flags
 target_compile_options(${PROJECT_NAME} PRIVATE
 	$<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
-	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>: -O3 -Wall -Wextra -Werror -Wfloat-equal -Wundef -Wcast-align -Wwrite-strings -Wconversion -Wunreachable-code -Wno-error=maybe-uninitialized -Wpedantic -Wno-error=unused-parameter -Wno-error=unused-parameter -Wno-error=unused-but-set-variable -Wno-error=unused-variable -Wno-error=discarded-qualifiers -Wno-error=return-type -Wno-error=sign-conversion>
+	$<$<NOT:$<CXX_COMPILER_ID:MSVC>>: -O3 -Wall -Wextra -Werror -Wfloat-equal -Wundef -Wcast-align -Wwrite-strings -Wconversion -Wunreachable-code -Wpedantic>
 )
 
 # Download/Update librairies if needed
@@ -39,13 +39,9 @@ endif()
 # Add Libraries
 set(BUILD_EXAMPLE OFF)
 add_subdirectory(lib/libuvc-theta)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GST REQUIRED gstreamer-app-1.0)
 
 # Includes
-target_include_directories(${PROJECT_NAME} PUBLIC include ${GST_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC include)
 
 # Link Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE uvc ${GST_LIBRARIES} Threads::Threads)
+target_link_libraries(${PROJECT_NAME} PRIVATE uvc)
