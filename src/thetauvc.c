@@ -30,6 +30,12 @@
 
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "libuvc/libuvc.h"
 #include "thetauvc.h"
 
 #define USBVID_RICOH 0x05ca
@@ -59,18 +65,6 @@ static thetauvc_mode_t stream_mode[] = {
 		.width = 1920,
 		.height = 960,
 		.fps = 29
-	},
-	{
-		.mode = THETAUVC_MODE_UHD_30,
-		.width = 3840,
-		.height = 1920,
-		.fps = 30
-	},
-	{
-		.mode = THETAUVC_MODE_FHD_30,
-		.width = 1920,
-		.height = 960,
-		.fps = 30
 	},
 	{
 		.mode = THETAUVC_MODE_NUM,
@@ -109,8 +103,8 @@ thetauvc_find_devices(uvc_context_t *ctx, uvc_device_t ***devs)
 			continue;
 
 		if (desc->idProduct == USBPID_THETAV_UVC
-			|| desc->idProduct == USBPID_THETAX_UVC
-			|| desc->idProduct == USBPID_THETAZ1_UVC) {
+			|| desc->idProduct == USBPID_THETAZ1_UVC
+			|| desc->idProduct == USBPID_THETAX_UVC) {
 			void *tmp_ptr;
 
 			devcnt++;
@@ -263,8 +257,6 @@ thetauvc_get_stream_ctrl_format_size(uvc_device_handle_t *devh,
 
 	m = &stream_mode[mode];
 
-  fprintf(stderr, "Select Mode: %i, Width: %i, Height: %i, FPS: %i\n", mode, m->width, m->height, m->fps);
-  
 	res = uvc_get_stream_ctrl_format_size(devh, ctrl,
 			UVC_FRAME_FORMAT_H264, m->width, m->height, m->fps);
 

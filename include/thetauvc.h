@@ -37,17 +37,9 @@
 extern "C" {
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <libuvc/libuvc.h>
-
 enum thetauvc_mode_code {
 	THETAUVC_MODE_UHD_2997 = 0,
 	THETAUVC_MODE_FHD_2997,
-	THETAUVC_MODE_UHD_30,
-	THETAUVC_MODE_FHD_30,
 	THETAUVC_MODE_NUM
 };
 

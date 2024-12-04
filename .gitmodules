@@ -1,6 +1,3 @@
 [submodule "lib/libuvc-theta"]
 	path = lib/libuvc-theta
 	url = https://github.com/ricohapi/libuvc-theta.git
-[submodule "lib/libuvc-theta-sample"]
-	path = lib/libuvc-theta-sample
-	url = https://github.com/ricohapi/libuvc-theta-sample.git
