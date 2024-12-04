@@ -63,11 +63,8 @@ int main(int argc, char **argv) {
 	res = uvc_start_streaming(devh, &ctrl, callback, NULL, 0);
 	if (res == UVC_SUCCESS) {
 		printf("Streaming...");
-
 		uvc_set_ae_mode(devh, 1); /* e.g., turn on auto exposure */
-
 		sleep(3); /* stream for x seconds */
-
 		uvc_stop_streaming(devh);
 		printf("Done streaming.");
 	}
