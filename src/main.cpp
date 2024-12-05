@@ -24,6 +24,7 @@ extern "C" {
 
 int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size);
 
+
 void callback (uvc_frame_t *frame, void *ptr);
 
 
@@ -102,47 +103,67 @@ int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size) {
     decoded_frame = av_frame_alloc();
     if (!decoded_frame) {
         printf("Failed to allocate frame\n");
+        av_packet_free(&packet);
         return 0;
     }
 
     codec = avcodec_find_decoder(AV_CODEC_ID_H264);
     if (!codec){
-        printf("Could not found codec by given id");
+        printf("Could not found codec by given id\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
         return 0;
     }
 
     avcontext = avcodec_alloc_context3(codec);
     if (!avcontext){
-        printf("Could not allocate avcodec context");
+        printf("Could not allocate avcodec context\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
         return 0;
     }
 
     res = avcodec_open2(avcontext, codec, NULL);
     if (res < 0){
-        printf("Could not initialize avcodec context");
+        printf("Could not initialize avcodec context\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
         return 0;
     }
 
     res = avcodec_send_packet(avcontext, packet);
     if (res < 0) {
-        printf("Error sending packet");
+        printf("Error sending packet\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
         return 0;
     }
 
     res = avcodec_receive_frame(avcontext, decoded_frame);
     if (res < 0) {
-        printf("Error decoding frame");
+        printf("Error decoding frame\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
         return 0;
     }
 
     desc = av_pix_fmt_desc_get(AV_PIX_FMT_RGB24);
     if (!desc){
-        printf("Can't get descriptor for pixel format");
+        printf("Can't get descriptor for pixel format\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
         return 0;
     }
     bytes_per_pixel = av_get_bits_per_pixel(desc) / 8;
     if (!(bytes_per_pixel==3 && !(av_get_bits_per_pixel(desc) % 8))){
-        printf("Unhandled bits per pixel, bad in pix fmt");
+        printf("Unhandled bits per pixel, bad in pix fmt\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
         return 0;
     }
     cv_linesize[0] = bytes_per_pixel * decoded_frame->width;
@@ -150,6 +171,9 @@ int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size) {
     *dst = (uint8_t*) malloc(bytes_per_pixel * decoded_frame->width * decoded_frame->height);
     if (!*dst){
         printf("Failed to allocate frame buffer\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
         return 0;
     }
 
@@ -160,6 +184,9 @@ int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size) {
     );
     if (!swscontext){
         printf("Failed to create sws context\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
         return 0;
     }
 
@@ -170,6 +197,10 @@ int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size) {
     );
     if (res != decoded_frame->height){
         printf("Failed to scale frame\n");
+        av_packet_free(&packet);
+        av_frame_free(&decoded_frame);
+        avcodec_free_context(&avcontext);
+        sws_freeContext(swscontext);
         return 0;
     }
 
@@ -181,11 +212,12 @@ int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size) {
     return 1;
 }
 
+
 void callback (uvc_frame_t *frame, void *ptr) {
 	uint8_t* frame_bgr24;
 	int res;
 
-	printf("received: frame_format = %d, width = %d, height = %d, length = %lu,\n", frame->frame_format, frame->width, frame->height, frame->data_bytes);
+	printf("received: frame_format = %d, width = %d, height = %d, length = %lu\n", frame->frame_format, frame->width, frame->height, frame->data_bytes);
 	
 	if (frame->frame_format == UVC_FRAME_FORMAT_H264) {
 
@@ -205,8 +237,10 @@ void callback (uvc_frame_t *frame, void *ptr) {
 		cv::imshow("Decoded Frame", test);
 		cv::waitKey(0);
 
+        free(frame_bgr24);
+
 	} else {
-		printf("[ERROR] Unexpected format %d", frame->frame_format);
+		printf("Unexpected format %d\n", frame->frame_format);
 	}
 
 	UNUSED(ptr);
