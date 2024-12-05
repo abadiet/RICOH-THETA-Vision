@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <libuvc/libuvc.h>
-#include <opencv2/opencv.hpp>
+#include "thetauvc.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -11,16 +11,18 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libswscale/swscale.h>
 #include <libavutil/pixdesc.h>
-#include "thetauvc.h"
 
 #if defined(__cplusplus)
 }
 #endif
 
+#include <opencv2/opencv.hpp>
+
+
 #define UNUSED(x) (void)(x)
 
 
-int h264_to_bgr24(uint8_t* dst, uint8_t* src, int size);
+int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size);
 
 void callback (uvc_frame_t *frame, void *ptr);
 
@@ -78,7 +80,7 @@ int main(int argc, char **argv) {
 }
 
 
-int h264_to_bgr24(uint8_t* dst, uint8_t* src, int size) {
+int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size) {
 	AVPacket* packet;
     AVFrame* decoded_frame;
     AVCodec* codec;
@@ -145,8 +147,8 @@ int h264_to_bgr24(uint8_t* dst, uint8_t* src, int size) {
     }
     cv_linesize[0] = bytes_per_pixel * decoded_frame->width;
 
-    dst = (uint8_t*) malloc(bytes_per_pixel * decoded_frame->width * decoded_frame->height);
-    if (!dst){
+    *dst = (uint8_t*) malloc(bytes_per_pixel * decoded_frame->width * decoded_frame->height);
+    if (!*dst){
         printf("Failed to allocate frame buffer\n");
         return 0;
     }
@@ -164,7 +166,7 @@ int h264_to_bgr24(uint8_t* dst, uint8_t* src, int size) {
     res = sws_scale(
         swscontext,
         decoded_frame->data, decoded_frame->linesize, 0, decoded_frame->height,
-        &dst, cv_linesize
+        dst, cv_linesize
     );
     if (res != decoded_frame->height){
         printf("Failed to scale frame\n");
@@ -193,7 +195,7 @@ void callback (uvc_frame_t *frame, void *ptr) {
 		fclose(fp); */
 
 		/* Convert to BGR24 */
-		res = h264_to_bgr24(frame_bgr24, (uint8_t*) frame->data, (int) frame->data_bytes);
+		res = h264_to_bgr24(&frame_bgr24, (uint8_t*) frame->data, (int) frame->data_bytes);
 		if (!res) {
 			printf("Failed to convert to BGR24\n");
 			return;

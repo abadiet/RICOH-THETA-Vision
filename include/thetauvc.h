@@ -33,6 +33,10 @@
 #if !defined(__THETAUVC_H__)
 #define __THETAUVC_H__
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 enum thetauvc_mode_code {
 	THETAUVC_MODE_UHD_2997 = 0,
 	THETAUVC_MODE_FHD_2997,
@@ -48,5 +52,8 @@ extern uvc_error_t thetauvc_get_stream_ctrl_format_size(uvc_device_handle_t *,
 extern uvc_error_t thetauvc_run_streaming(uvc_device_t *, uvc_device_handle_t **,
 	unsigned int, uvc_frame_callback_t *, void *);
 
+#if defined(__cplusplus)
+}
+#endif
 
 #endif
