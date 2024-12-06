@@ -39,12 +39,16 @@ endif()
 # Add Libraries
 set(BUILD_EXAMPLE OFF)
 add_subdirectory(lib/libuvc-theta)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavutil libswscale libswresample)
+find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
+find_library(AVCODEC_LIBRARY avcodec)
+find_path(SWSCALE_INCLUDE_DIR libswscale/swscale.h)
+find_library(SWSCALE_LIBRARY swscale)
+find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
+find_library(AVUTIL_LIBRARY avutil)
 find_package(OpenCV REQUIRED)
 
 # Includes
-target_include_directories(${PROJECT_NAME} PUBLIC include ${FFMPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC include ${AVCODEC_INCLUDE_DIR} ${SWSCALE_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
 
 # Link Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE uvc ${FFMPEG_LIBRARIES} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE uvc ${AVCODEC_LIBRARY} ${SWSCALE_LIBRARY} ${AVUTIL_LIBRARY} ${OpenCV_LIBS})
