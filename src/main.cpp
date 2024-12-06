@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include "thetauvc.h"
 #include "conversion.h"
+#include "projection.hpp"
 
 #include <opencv2/opencv.hpp>
 
@@ -78,8 +79,12 @@ void callback(uvc_frame_t *frame, void *ptr) {
     struct timeval start, end;
 	uint8_t* frame_bgr24;
 	int res;
-    /* static int frame_count = 0;
-    char filename[16]; */
+    static int frame_count = 0;
+    char filename[16];
+	const int width = frame->width;
+	const int height = frame->height;
+	const double fov_x = 3.14 / 2.0;
+	const double fov_y = fov_x * height / width;
 
     gettimeofday(&start, NULL);
     printf("Received a frame: frame_format = %d, width = %d, height = %d, length = %lu\n", frame->frame_format, frame->width, frame->height, frame->data_bytes);
@@ -102,8 +107,16 @@ void callback(uvc_frame_t *frame, void *ptr) {
         cv::Mat img(frame->height, frame->width, CV_8UC3, frame_bgr24);
 
 		/* Save BGR24 */
-        /* sprintf(filename, ".test/%d.jpg", frame_count++);
-        cv::imwrite(filename, img); */
+        /*sprintf(filename, ".test/%d.jpg", frame_count++);
+        cv::imwrite(filename, img);*/
+
+        /* Project the sperical image to a perspective one */
+        cv::Mat outFrame;
+		Equirectangular_to_Perspective(&outFrame, img, 3.14, 3.14 / 2.0, width, height, fov_x, fov_y, true);
+
+        /* Save result */
+        sprintf(filename, ".test/%d.jpg", frame_count++);
+        cv::imwrite(filename, outFrame);
 
         free(frame_bgr24);
 

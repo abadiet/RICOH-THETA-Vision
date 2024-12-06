@@ -3,7 +3,12 @@
 #define PI 3.1415926535897931
 
 
-double Range_Modulo(double x, double lower_limit, double upper_limit) {
+double Range_Modulo(double x, double min, double max) {
+    const double range = max - min;
+    return x - range * floor((x - min) / range);
+}
+
+/*double Range_Modulo(double x, double lower_limit, double upper_limit) {
     while (x <= lower_limit) {
         x += (upper_limit - lower_limit);
     }
@@ -11,49 +16,50 @@ double Range_Modulo(double x, double lower_limit, double upper_limit) {
         x -= (upper_limit - lower_limit);
     }
     return x;
-}
+}*/
 
 
-void Equirectangular_to_Perspective(cv::Mat* dest, cv::Mat& src, double center_lat, double center_lon, int width, int height, double R, bool debug) {
-    int x, y, x_rela, y_rela, equ_x, equ_y;
-    double lat, lon, lat_norm, lon_norm;
+void Equirectangular_to_Perspective(cv::Mat* dest, cv::Mat& src, double center_lat, double center_lon, int width, int height, double fov_x, double fov_y, bool debug) {
+    double x_norm, y_norm, roh, c, lat, lon;
+    int x_src, y_src;
 
     if (!debug) {
-	    *dest = cv::Mat(height, width, src.type());
+        dest->create(height, width, src.type());
     } else {
-	    *dest = src.clone();
+        *dest = src.clone();
     }
 
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
 
-            /* relative position to the perspective center */
-            x_rela = x - width / 2;
-            y_rela = y - height / 2;
+            x_norm = ((double)x / (width - 1) * 2 - 1) * fov_x;
+            y_norm = ((double)y / (height - 1) * 2 - 1) * fov_y;
 
-            /* perspective to spherical */
-            lat = Range_Modulo(center_lat + atan(x_rela / R), -PI, PI);
-            lon = Range_Modulo(center_lon + atan(y_rela / R), -PI / 2.0, PI / 2.0);
+            roh = sqrt(x_norm * x_norm + y_norm * y_norm);
+            c = atan(roh);
 
-            /* spherical to equirectangular */
-            lat_norm = (lat + PI) / (2.0 * PI);
-            lon_norm = (lon + PI / 2.0) / PI;
-            equ_x = (int) (lat_norm * (double) src.cols);
-            equ_y = (int) (lon_norm * (double) src.rows);
+            lon = asin(cos(c) * sin(center_lon) + (y_norm * sin(c) * cos(center_lon)) / roh);
+            lat = center_lat + atan2(x_norm * sin(c), roh * cos(center_lon) * cos(c) - y_norm * sin(center_lon) * sin(c));
 
-            if (equ_x >= 0 && equ_x < src.cols && equ_y >= 0 && equ_y < src.rows) {
-                if (!debug) {
-                    dest->at<cv::Vec3b>(y, x) = src.at<cv::Vec3b>(equ_y, equ_x);
-                } else {
-                    dest->at<cv::Vec3b>(equ_y, equ_x) = cv::Vec3b(0, 0, 255);
-                }
-            } else {
-                if (!debug) {
-                    dest->at<cv::Vec3b>(y, x) = cv::Vec3b(0, 0, 255);
-                }
-                printf("Pixel out of range: perspective(%d, %d), spherical(%f, %f), spherical(norm)(%f, %f), equirectangular(%d, %d)\n", x, y, lat, lon, lat_norm, lon_norm, equ_x, equ_y);
+            lat = Range_Modulo(lat, -PI / 2.0, PI / 2.0);
+            lon = Range_Modulo(lon, -PI, PI);
+
+            lon = (lon / (PI / 2.0) + 1.0) * 0.5;
+            lat = (lat / PI + 1.0) * 0.5;
+
+            x_src = (int) floor(lat * src.cols);
+            y_src = (int) floor(lon * src.rows);
+
+            if (x_src < 0 || x_src >= src.cols || y_src < 0 || y_src >= src.rows) {
+                printf("Pixel out of bounds: x_src = %d, y_src = %d\n", x_src, y_src);
+                return;
             }
 
+            if (!debug) {
+                dest->at<cv::Vec3b>(y, x) = src.at<cv::Vec3b>(y_src, x_src);
+            } else {
+                dest->at<cv::Vec3b>(y_src, x_src) = cv::Vec3b(0, 0, 255);
+            }
         }
     }
 }
