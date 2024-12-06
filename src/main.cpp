@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/select.h>
 #include <libuvc/libuvc.h>
+#include <sys/time.h>
 #include "thetauvc.h"
 
 #if defined(__cplusplus)
@@ -67,7 +68,7 @@ int main(int argc, char **argv) {
 	res = uvc_start_streaming(devh, &ctrl, callback, NULL, 0);
 	if (res == UVC_SUCCESS) {
 		printf("Streaming...\n");
-		usleep(100000);
+		usleep(500000);
 		uvc_stop_streaming(devh);
 		printf("Done streaming.\n");
 	}
@@ -213,11 +214,13 @@ int h264_to_bgr24(uint8_t** dst, uint8_t* src, int size) {
 }
 
 
-void callback (uvc_frame_t *frame, void *ptr) {
+void callback(uvc_frame_t *frame, void *ptr) {
+    struct timeval start, end;
 	uint8_t* frame_bgr24;
 	int res;
 
-	printf("received: frame_format = %d, width = %d, height = %d, length = %lu\n", frame->frame_format, frame->width, frame->height, frame->data_bytes);
+    gettimeofday(&start, NULL);
+    printf("Received a frame: frame_format = %d, width = %d, height = %d, length = %lu\n", frame->frame_format, frame->width, frame->height, frame->data_bytes);
 	
 	if (frame->frame_format == UVC_FRAME_FORMAT_H264) {
 
@@ -233,15 +236,18 @@ void callback (uvc_frame_t *frame, void *ptr) {
 			return;
 		}
 
-		cv::Mat test(frame->height, frame->width, CV_8UC3, frame_bgr24);
-		cv::imshow("Decoded Frame", test);
-		cv::waitKey(0);
+		/* Save BGR24 */
+        cv::Mat img(frame->height, frame->width, CV_8UC3, frame_bgr24);
+        cv::imwrite("frame.jpg", img);
 
         free(frame_bgr24);
 
 	} else {
 		printf("Unexpected format %d\n", frame->frame_format);
 	}
+
+    gettimeofday(&end, NULL);
+    printf("Callback execution time: %lu us\n", (end.tv_sec - start.tv_sec) * 1000000 + end.tv_usec - start.tv_usec);
 
 	UNUSED(ptr);
 }
