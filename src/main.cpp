@@ -78,8 +78,8 @@ void callback(uvc_frame_t *frame, void *ptr) {
     struct timeval start, end;
 	uint8_t* frame_bgr24;
 	int res;
-    static int frame_count = 0;
-    char filename[16];
+    /* static int frame_count = 0;
+    char filename[16]; */
 
     gettimeofday(&start, NULL);
     printf("Received a frame: frame_format = %d, width = %d, height = %d, length = %lu\n", frame->frame_format, frame->width, frame->height, frame->data_bytes);
@@ -87,7 +87,8 @@ void callback(uvc_frame_t *frame, void *ptr) {
 	if (frame->frame_format == UVC_FRAME_FORMAT_H264) {
 
 		/* Save H264 */
-		/* fp = fopen("frame.h264", "w");
+        /* sprintf(filename, ".test/%d.h264", frame_count++);
+		fp = fopen(filename, "w");
 		fwrite(frame->data, 1, frame->data_bytes, fp);
 		fclose(fp); */
 
@@ -98,10 +99,11 @@ void callback(uvc_frame_t *frame, void *ptr) {
 			return;
 		}
 
-		/* Save BGR24 */
         cv::Mat img(frame->height, frame->width, CV_8UC3, frame_bgr24);
-        sprintf(filename, ".test/%d.jpg", frame_count++);
-        cv::imwrite(filename, img);
+
+		/* Save BGR24 */
+        /* sprintf(filename, ".test/%d.jpg", frame_count++);
+        cv::imwrite(filename, img); */
 
         free(frame_bgr24);
 
