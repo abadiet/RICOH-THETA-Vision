@@ -1,6 +1,15 @@
 #include "conversion.h"
 
 
+struct Conversion {
+    AVPacket* packet;
+    AVFrame* decoded_frame;
+    AVCodec* codec;
+    AVCodecContext* avcontext;
+    int bytes_per_pixel;
+};
+
+
 Conversion_t Init_Conversion() {
     Conversion_t conv;
     const AVPixFmtDescriptor* desc;

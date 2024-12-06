@@ -12,13 +12,6 @@ extern "C" {
 #include <libavutil/pixdesc.h>
 
 
-struct Conversion {
-    AVPacket* packet;
-    AVFrame* decoded_frame;
-    AVCodec* codec;
-    AVCodecContext* avcontext;
-    int bytes_per_pixel;
-};
 typedef struct Conversion* Conversion_t;
 
 

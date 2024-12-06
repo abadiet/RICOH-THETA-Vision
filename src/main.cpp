@@ -13,6 +13,12 @@
 #define UNUSED(x) (void)(x)
 
 
+struct Callback_Args {
+	Conversion_t conv;
+	Projection_t projec;
+};
+
+
 void callback (uvc_frame_t *frame, void *ptr);
 
 
@@ -22,9 +28,19 @@ int main(int argc, char **argv) {
 	uvc_device_handle_t *devh;
 	uvc_stream_ctrl_t ctrl;
 	uvc_error_t res;
-    Conversion_t conv;
+	struct Callback_Args args;
 
-    conv = Init_Conversion();
+	const int width_raw_frame = 3840;
+	const int height_raw_frame = 1920;
+	const int width = 1500;
+	const int height = 1000;
+	const double fov_x = 3.14 / 2.0;
+	const double fov_y = fov_x * height / width;
+    const double center_lat = 0.0;
+    const double center_lon = 0.0;
+    args.projec = Init_Projection(width_raw_frame, height_raw_frame, center_lat, center_lon, width, height, fov_x, fov_y);
+
+    args.conv = Init_Conversion();
 
 	res = uvc_init(&ctx, NULL);
 	if (res != UVC_SUCCESS) {
@@ -55,7 +71,7 @@ int main(int argc, char **argv) {
 	/* uvc_set_focus_auto
 	uvc_set_digital_roi */
 
-	res = uvc_start_streaming(devh, &ctrl, callback, conv, 0);
+	res = uvc_start_streaming(devh, &ctrl, callback, &args, 0);
 	if (res == UVC_SUCCESS) {
 		printf("Streaming...\n");
 		usleep(500000);
@@ -66,7 +82,8 @@ int main(int argc, char **argv) {
 	uvc_close(devh);
 	uvc_exit(ctx);
 
-    Free_Conversion(&conv);
+    Free_Conversion(&args.conv);
+	Free_Projection(&args.projec);
 
 	return res;
 
@@ -81,10 +98,7 @@ void callback(uvc_frame_t *frame, void *ptr) {
 	int res;
     static int frame_count = 0;
     char filename[16];
-	const int width = frame->width;
-	const int height = frame->height;
-	const double fov_x = 3.14 / 2.0;
-	const double fov_y = fov_x * height / width;
+	struct Callback_Args *args = (struct Callback_Args *) ptr;
 
     gettimeofday(&start, NULL);
     printf("Received a frame: frame_format = %d, width = %d, height = %d, length = %lu\n", frame->frame_format, frame->width, frame->height, frame->data_bytes);
@@ -98,7 +112,7 @@ void callback(uvc_frame_t *frame, void *ptr) {
 		fclose(fp); */
 
 		/* Convert to BGR24 */
-		res = H264_to_BGR24((Conversion_t) ptr, &frame_bgr24, (uint8_t*) frame->data, (int) frame->data_bytes);
+		res = H264_to_BGR24(args->conv, &frame_bgr24, (uint8_t*) frame->data, (int) frame->data_bytes);
 		if (!res) {
 			printf("Failed to convert to BGR24\n");
 			return;
@@ -112,7 +126,7 @@ void callback(uvc_frame_t *frame, void *ptr) {
 
         /* Project the sperical image to a perspective one */
         cv::Mat outFrame;
-		Equirectangular_to_Perspective(&outFrame, img, 3.14, 3.14 / 2.0, width, height, fov_x, fov_y, true);
+		Equirectangular_to_Perspective(args->projec, &outFrame, img, false);
 
         /* Save result */
         sprintf(filename, ".test/%d.jpg", frame_count++);
