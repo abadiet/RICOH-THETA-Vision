@@ -46,10 +46,9 @@ find_path(SWSCALE_INCLUDE_DIR libswscale/swscale.h)
 find_library(SWSCALE_LIBRARY swscale)
 find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
 find_library(AVUTIL_LIBRARY avutil)
-# find_package(OpenCV REQUIRED)
 
 # Includes
-target_include_directories(${PROJECT_NAME} PUBLIC include ${AVCODEC_INCLUDE_DIR} ${SWSCALE_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR})  # ${OpenCV_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC include ${AVCODEC_INCLUDE_DIR} ${SWSCALE_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR})
 
 # Link Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE ${MATH_LIBRARY} uvc ${AVCODEC_LIBRARY} ${SWSCALE_LIBRARY} ${AVUTIL_LIBRARY})  # ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${MATH_LIBRARY} uvc ${AVCODEC_LIBRARY} ${SWSCALE_LIBRARY} ${AVUTIL_LIBRARY})

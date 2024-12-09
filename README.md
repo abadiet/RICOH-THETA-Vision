@@ -1,12 +1,24 @@
-# 360-stream
+# RICOH THETA Vision
 
-Repo dedicated to process the stream from the Ricoh Theta X.
+Repo dedicated to build a fast RICOH THETA USB streamer in order to be used as a vision camera during the French Robotics Cup.
 
-## Install
+## Benchmark
 
-```sudo apt install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libusb-1.0-0-dev libjpeg-dev ffmpeg libopencv-dev cmake```
+*Comming soon*
+
+## Dependencies
+
+```sudo apt install -y libusb-1.0-0-dev ffmpeg cmake```
+
+## TODO
+
+- [ ] Is BGR24 the best option?
+- [ ] GPU
+- [ ] SIMD
+- [ ] Local stream
+- [ ] Benchmark
 
 ## References
 
 - [RICOH THETA API](https://github.com/ricohapi/theta-api-specs)
-- [LibUVC](https://github.com/ricohapi/libuvc-theta), a libUSB layer to communicate with RICOH THETA
+- [LibUVC](https://github.com/ricohapi/libuvc-theta), a libUSB-based library to communicate with RICOH THETA
