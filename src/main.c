@@ -5,10 +5,7 @@
 #include <sys/time.h>
 #include "thetauvc.h"
 #include "conversion.h"
-#include "projection.hpp"
-
-#include <opencv2/opencv.hpp>
-
+#include "projection.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -32,13 +29,14 @@ int main(int argc, char **argv) {
 
 	const int width_raw_frame = 3840;
 	const int height_raw_frame = 1920;
+	const int channels = 3;
 	const int width = 1500;
 	const int height = 1000;
 	const double fov_x = 3.14 / 2.0;
 	const double fov_y = fov_x * height / width;
     const double center_lat = 0.0;
     const double center_lon = 0.0;
-    args.projec = Init_Projection(width_raw_frame, height_raw_frame, center_lat, center_lon, width, height, fov_x, fov_y);
+    args.projec = Init_Projection(width_raw_frame, height_raw_frame, channels, center_lat, center_lon, width, height, fov_x, fov_y);
 
     args.conv = Init_Conversion();
 
@@ -94,10 +92,12 @@ int main(int argc, char **argv) {
 
 void callback(uvc_frame_t *frame, void *ptr) {
     struct timeval start, end;
-	uint8_t* frame_bgr24;
+	uint8_t *frame_bgr24, *frame_perspective;
+	size_t frame_perspective_sz;
 	int res;
+	/* FILE *fp;
     static int frame_count = 0;
-    char filename[16];
+    char filename[32]; */
 	struct Callback_Args *args = (struct Callback_Args *) ptr;
 
     gettimeofday(&start, NULL);
@@ -106,33 +106,41 @@ void callback(uvc_frame_t *frame, void *ptr) {
 	if (frame->frame_format == UVC_FRAME_FORMAT_H264) {
 
 		/* Save H264 */
-        /* sprintf(filename, ".test/%d.h264", frame_count++);
+        /* sprintf(filename, ".test123/%d.h264", frame_count);
 		fp = fopen(filename, "w");
 		fwrite(frame->data, 1, frame->data_bytes, fp);
 		fclose(fp); */
 
 		/* Convert to BGR24 */
-		res = H264_to_BGR24(args->conv, &frame_bgr24, (uint8_t*) frame->data, (int) frame->data_bytes);
+		res = H264_to_BGR24(args->conv, &frame_bgr24, (uint8_t*) frame->data, frame->data_bytes);
 		if (!res) {
 			printf("Failed to convert to BGR24\n");
 			return;
 		}
 
-        cv::Mat img(frame->height, frame->width, CV_8UC3, frame_bgr24);
-
 		/* Save BGR24 */
-        /*sprintf(filename, ".test/%d.jpg", frame_count++);
-        cv::imwrite(filename, img);*/
+        /* sprintf(filename, ".test123/%d.bgr24", frame_count);
+		fp = fopen(filename, "w");
+		fwrite(frame_bgr24, sizeof(uint8_t), frame->width * frame->height * 3 * sizeof(uint8_t), fp);
+		fclose(fp); */
 
-        /* Project the sperical image to a perspective one */
-        cv::Mat outFrame;
-		Equirectangular_to_Perspective(args->projec, &outFrame, img, false);
+        /* Project the equirectangular image to a perspective one */
+		frame_perspective_sz = Equirectangular_to_Perspective(args->projec, &frame_perspective, frame_bgr24, false);
+		if (!frame_perspective_sz) {
+			printf("Failed to project to perspective\n");
+			return;
+		}
 
         /* Save result */
-        sprintf(filename, ".test/%d.jpg", frame_count++);
-        cv::imwrite(filename, outFrame);
+		/* sprintf(filename, ".test123/%d.jpg", frame_count);
+		fp = fopen(filename, "w");
+		fwrite(frame_perspective, 1, frame_perspective_sz, fp);
+		fclose(fp); */
 
         free(frame_bgr24);
+		free(frame_perspective);
+    
+        /* frame_count++; */
 
 	} else {
 		printf("Unexpected format %d\n", frame->frame_format);

@@ -37,6 +37,7 @@ endif()
 
 
 # Add Libraries
+find_library(MATH_LIBRARY m)
 set(BUILD_EXAMPLE OFF)
 add_subdirectory(lib/libuvc-theta)
 find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
@@ -45,10 +46,10 @@ find_path(SWSCALE_INCLUDE_DIR libswscale/swscale.h)
 find_library(SWSCALE_LIBRARY swscale)
 find_path(AVUTIL_INCLUDE_DIR libavutil/avutil.h)
 find_library(AVUTIL_LIBRARY avutil)
-find_package(OpenCV REQUIRED)
+# find_package(OpenCV REQUIRED)
 
 # Includes
-target_include_directories(${PROJECT_NAME} PUBLIC include ${AVCODEC_INCLUDE_DIR} ${SWSCALE_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC include ${AVCODEC_INCLUDE_DIR} ${SWSCALE_INCLUDE_DIR} ${AVUTIL_INCLUDE_DIR})  # ${OpenCV_INCLUDE_DIRS})
 
 # Link Libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE uvc ${AVCODEC_LIBRARY} ${SWSCALE_LIBRARY} ${AVUTIL_LIBRARY} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${MATH_LIBRARY} uvc ${AVCODEC_LIBRARY} ${SWSCALE_LIBRARY} ${AVUTIL_LIBRARY})  # ${OpenCV_LIBS})

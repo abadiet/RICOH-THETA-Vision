@@ -87,13 +87,13 @@ Conversion_t Init_Conversion() {
 }
 
 
-int H264_to_BGR24(Conversion_t conv, uint8_t** dst, uint8_t* src, int size) {
+int H264_to_BGR24(Conversion_t conv, uint8_t** dst, uint8_t* src, size_t size) {
     struct SwsContext* swscontext;
     int cv_linesize[1];
     int res;
 
     conv->packet->data = src;
-    conv->packet->size = size;
+    conv->packet->size = (int) size;
 
     res = avcodec_send_packet(conv->avcontext, conv->packet);
     if (res < 0) {
