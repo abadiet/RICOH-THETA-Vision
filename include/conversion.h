@@ -15,7 +15,7 @@ extern "C" {
 typedef struct Conversion* Conversion_t;
 
 
-Conversion_t Init_Conversion();
+Conversion_t Init_Conversion(enum AVCodecID from_fmt, enum AVPixelFormat to_fmt, unsigned int channels);
 
 int H264_to_BGR24(Conversion_t conv, uint8_t** dst, uint8_t* src, size_t size);
 

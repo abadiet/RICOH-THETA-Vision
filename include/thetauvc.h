@@ -43,12 +43,40 @@ enum thetauvc_mode_code {
 	THETAUVC_MODE_NUM
 };
 
+struct thetauvc_mode {
+	unsigned int mode;
+	unsigned int width;
+	unsigned int height;
+	unsigned int fps;
+};
+typedef struct thetauvc_mode thetauvc_mode_t;
+static thetauvc_mode_t stream_mode[] = {
+	{
+		.mode = THETAUVC_MODE_UHD_2997,
+		.width = 3840,
+		.height = 1920,
+		.fps = 29
+	},
+	{
+		.mode = THETAUVC_MODE_FHD_2997,
+		.width = 1920,
+		.height = 960,
+		.fps = 29
+	},
+	{
+		.mode = THETAUVC_MODE_NUM,
+		.width = 0,
+		.height = 0,
+		.fps = 0
+	}
+};
+
 extern uvc_error_t thetauvc_find_devices(uvc_context_t *, uvc_device_t ***);
 extern uvc_error_t thetauvc_print_devices(uvc_context_t *, FILE *);
 extern uvc_error_t thetauvc_find_device(uvc_context_t *, uvc_device_t **,
 	unsigned int);
 extern uvc_error_t thetauvc_get_stream_ctrl_format_size(uvc_device_handle_t *,
-	       	unsigned int, uvc_stream_ctrl_t *);
+		   	unsigned int, uvc_stream_ctrl_t *);
 extern uvc_error_t thetauvc_run_streaming(uvc_device_t *, uvc_device_handle_t **,
 	unsigned int, uvc_frame_callback_t *, void *);
 

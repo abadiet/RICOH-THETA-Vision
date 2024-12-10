@@ -17,7 +17,7 @@ extern "C" {
 typedef struct Projection* Projection_t;
 
 
-Projection_t Init_Projection(int width_src, int height_src, int channels, double center_lat, double center_lon, int width, int height, double fov_x, double fov_y);
+Projection_t Init_Projection(unsigned int width_src, unsigned int height_src, unsigned int channels, double center_lat, double center_lon, unsigned int width, unsigned int height, double fov_x, double fov_y);
 
 size_t Equirectangular_to_Perspective(Projection_t projec, uint8_t** dst, uint8_t* src, bool debug);
 

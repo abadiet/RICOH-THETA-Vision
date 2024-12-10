@@ -8,7 +8,11 @@ Repo dedicated to build a fast RICOH THETA USB streamer in order to be used as a
 
 ## Dependencies
 
-```sudo apt install -y libusb-1.0-0-dev ffmpeg cmake```
+Install:
+```sudo apt install -y v4l2loopback-dkms libusb-1.0-0-dev ffmpeg cmake```
+
+v4l2loopback setup:
+```sudo modprobe v4l2loopback```
 
 ## TODO
 
