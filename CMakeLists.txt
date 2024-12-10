@@ -37,8 +37,9 @@ endif()
 
 
 # Add Libraries
+set(CMAKE_BUILD_TARGET "Shared" CACHE STRING "Build target")
 find_library(MATH_LIBRARY m)
-set(BUILD_EXAMPLE OFF)
+set(BUILD_EXAMPLE OFF CACHE BOOL "Don't build libuvc examples")
 add_subdirectory(lib/libuvc-theta)
 find_path(AVCODEC_INCLUDE_DIR libavcodec/avcodec.h)
 find_library(AVCODEC_LIBRARY avcodec)
