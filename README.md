@@ -19,7 +19,7 @@ v4l2loopback setup:
 - [ ] Is BGR24 the best option?
 - [ ] GPU
 - [ ] SIMD
-- [ ] Local stream
+- [x] Local stream
 - [ ] Benchmark
 
 ## References
