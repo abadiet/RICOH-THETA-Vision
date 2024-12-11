@@ -6,6 +6,8 @@
 #include <linux/videodev2.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "thetauvc.h"
 #include "conversion.h"
 #include "projection.h"
@@ -19,7 +21,7 @@ struct Callback_Args {
 	int dev_fd;
 };
 
-uvc_error_t Setup_UVC(uvc_device_handle_t **devh, uvc_stream_ctrl_t *ctrl, unsigned int mode);
+uvc_error_t Setup_UVC(uvc_device_handle_t **devh, uvc_stream_ctrl_t *ctrl, uvc_context_t **ctx, unsigned int mode);
 
 int Open_Video(const char *device, __u32 frame_width, __u32 frame_height, __u32 frame_bytes);
 
@@ -29,6 +31,7 @@ void callback(uvc_frame_t *frame, void *ptr);
 int main(int argc, char **argv) {
 	uvc_device_handle_t *devh;
 	uvc_stream_ctrl_t ctrl;
+	uvc_context_t *ctx;
 	uvc_error_t res;
 	struct Callback_Args args;
 
@@ -36,7 +39,7 @@ int main(int argc, char **argv) {
 	const unsigned int width_raw_frame = stream_mode[thetauvc_mode].width;
 	const unsigned int height_raw_frame = stream_mode[thetauvc_mode].height;
 	const unsigned int channels = 3;
-	const unsigned int width = 1500;
+	const unsigned int width = 1496;
 	const unsigned int height = 1000;
 	const double fov_x = 3.14 / 2.0;
 	const double fov_y = fov_x * height / width;
@@ -46,7 +49,7 @@ int main(int argc, char **argv) {
 
 	args.conv = Init_Conversion(AV_CODEC_ID_H264, AV_PIX_FMT_BGR24, channels);
 
-	res = Setup_UVC(&devh, &ctrl, thetauvc_mode);
+	res = Setup_UVC(&devh, &ctrl, &ctx, thetauvc_mode);
 	if (res != UVC_SUCCESS) {
 		return res;
 	}
@@ -60,13 +63,16 @@ int main(int argc, char **argv) {
 	if (res == UVC_SUCCESS) {
 		printf("Streaming...\n");
 
-		usleep(500000);
+		usleep(30000000);
 
 		uvc_stop_streaming(devh);
 		printf("Done streaming.\n");
+	} else {
+		uvc_perror(res, "Failed to start streaming");
 	}
 
 	uvc_close(devh);
+	uvc_exit(ctx);
 
 	Free_Conversion(&args.conv);
 	Free_Projection(&args.projec);
@@ -79,28 +85,25 @@ int main(int argc, char **argv) {
 }
 
 
-uvc_error_t Setup_UVC(uvc_device_handle_t **devh, uvc_stream_ctrl_t *ctrl, unsigned int mode) {
-	uvc_context_t *ctx;
+uvc_error_t Setup_UVC(uvc_device_handle_t **devh, uvc_stream_ctrl_t *ctrl, uvc_context_t **ctx, unsigned int mode) {
 	uvc_device_t *dev;
 	uvc_error_t res;
 
-	res = uvc_init(&ctx, NULL);
+	res = uvc_init(ctx, NULL);
 	if (res != UVC_SUCCESS) {
 		uvc_perror(res, "uvc_init");
 		return res;
 	}
 
-	res = thetauvc_find_device(ctx, &dev, 0);
+	res = thetauvc_find_device(*ctx, &dev, 0);
 	if (res != UVC_SUCCESS) {
 		fprintf(stderr, "THETA not found\n");
-		uvc_exit(ctx);
 		return res;
 	}
 
 	res = uvc_open(dev, devh);
 	if (res != UVC_SUCCESS) {
 		fprintf(stderr, "Can't open THETA\n");
-		uvc_exit(ctx);
 		return res;
 	}
 
@@ -112,8 +115,6 @@ uvc_error_t Setup_UVC(uvc_device_handle_t **devh, uvc_stream_ctrl_t *ctrl, unsig
 	if (res != UVC_SUCCESS) uvc_perror(res, "AE mode control not applied");
 	/* uvc_set_focus_auto
 	uvc_set_digital_roi */
-
-	uvc_exit(ctx);
 
 	return UVC_SUCCESS;
 }
