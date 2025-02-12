@@ -1,10 +1,9 @@
 # RICOH THETA Vision
 
-Repo dedicated to build a fast RICOH THETA USB streamer in order to be used as a vision camera during the French Robotics Cup.
+A fast RICOH THETA USB streamer for machine vision in the French Robotics Cup.
 
-## Benchmark
-
-*Comming soon*
+> [!CAUTION]
+> This project is abandoned as the camera as a too high internal latency.
 
 ## Dependencies
 
